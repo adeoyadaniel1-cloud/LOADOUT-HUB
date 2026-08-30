@@ -2,7 +2,7 @@
   "name": "Loadout Hub - Gaming Performance",
   "short_name": "Loadout Hub",
   "description": "Real-time gaming performance monitoring for PC, mobile, and tablet",
-  "start_url": "./index html.html",
+  "start_url": "./index.html"
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -35,7 +35,7 @@
       "name": "Gaming Mode",
       "short_name": "Gaming",
       "description": "Open in gaming mode overlay",
-      "url": "./index html.html?mode=gaming",
+      "url": "./index.html"?mode=gaming",
       "icons": [
         {
           "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%238c7dff' width='96' height='96' rx='20'/><text x='48' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial'>🎮</text></svg>",
