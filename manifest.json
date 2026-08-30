@@ -1,0 +1,66 @@
+{
+  "name": "Loadout Hub - Gaming Performance",
+  "short_name": "Loadout Hub",
+  "description": "Real-time gaming performance monitoring for PC, mobile, and tablet",
+  "start_url": "./index html.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#070b14",
+  "background_color": "#070b14",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%2357d0ff' width='192' height='192' rx='40'/><text x='96' y='130' font-size='120' font-weight='bold' text-anchor='middle' fill='%23070b14' font-family='Arial'>L</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%23070b14' width='512' height='512'/><circle cx='256' cy='256' r='200' fill='%2357d0ff' opacity='0.8'/><text x='256' y='330' font-size='280' font-weight='bold' text-anchor='middle' fill='%23070b14' font-family='Arial'>L</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23070b14' width='540' height='720'/><rect fill='%23111b2f' x='20' y='40' width='500' height='200' rx='12'/><text x='270' y='120' font-size='32' font-weight='bold' text-anchor='middle' fill='%2357d0ff' font-family='Arial'>Loadout Hub</text><text x='270' y='180' font-size='20' text-anchor='middle' fill='%23a3b7d8' font-family='Arial'>Gaming Performance</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Gaming Mode",
+      "short_name": "Gaming",
+      "description": "Open in gaming mode overlay",
+      "url": "./index html.html?mode=gaming",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%238c7dff' width='96' height='96' rx='20'/><text x='48' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial'>🎮</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open full dashboard view",
+      "url": "./index html.html",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%2357d0ff' width='96' height='96' rx='20'/><text x='48' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial'>📊</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "application/x-www-form-urlencoded"
+  }
+}
