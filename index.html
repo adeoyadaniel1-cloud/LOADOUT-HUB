@@ -1,849 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Loadout Hub | Gaming Performance</title>
-    <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#070b14" />
-    <style>
-      :root {
-        --bg: #070b14;
-        --bg-soft: #111b2f;
-        --panel: rgba(17, 28, 46, 0.9);
-        --panel-strong: rgba(12, 18, 31, 0.95);
-        --line: rgba(143, 166, 255, 0.2);
-        --text: #ebf3ff;
-        --muted: #a3b7d8;
-        --primary: #57d0ff;
-        --primary-2: #8c7dff;
-        --green: #73f9a9;
-        --yellow: #ffcc5c;
-        --red: #ff6f91;
-        --shadow: 0 18px 50px rgba(10, 18, 34, 0.5);
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loadout Hub - Stealth Mode</title>
+  <style>
+    body {
+      background-color: #000000; /* Pure Black Background */
+      color: #ffffff; /* Crisp White Text */
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    h1 { 
+      text-transform: uppercase; 
+      letter-spacing: 3px; 
+      color: #ffffff;
+    }
+    .status-box {
+      background-color: #0a0a0a; /* Almost black */
+      padding: 20px;
+      border-radius: 5px;
+      border: 1px solid #333333; /* Dark grey border */
+      margin: 20px 0;
+      width: 80%;
+      max-width: 400px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    }
+    button {
+      background-color: #000000;
+      color: #ffffff;
+      border: 1px solid #ffffff;
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 3px;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      transition: 0.2s ease-in-out;
+    }
+    button:active { 
+      transform: scale(0.95); 
+      background-color: #ffffff;
+      color: #000000;
+    }
+    #log { 
+      margin-top: 20px; 
+      color: #666666; 
+      font-size: 14px; 
+    }
+  </style>
+</head>
+<body>
 
-      * {
-        box-sizing: border-box;
-      }
+  <h1>Loadout Hub</h1>
+  
+  <div class="status-box">
+    <h3>Network: <span id="network-status" style="color: #00ff00;">Checking...</span></h3>
+    <p>Screen Lock: <span id="wake-status" style="color: #ff3333;">OFF</span></p>
+  </div>
 
-      body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background:
-          radial-gradient(circle at top left, rgba(87, 208, 255, 0.18), transparent 25%),
-          radial-gradient(circle at bottom right, rgba(140, 125, 255, 0.2), transparent 30%),
-          linear-gradient(135deg, #050910 0%, #0b1220 35%, #0f1c2f 100%);
-        color: var(--text);
-      }
+  <button id="boostBtn">Activate Stealth Mode</button>
+  <div id="log">Awaiting deployment...</div>
 
-      .shell {
-        max-width: 1280px;
-        margin: 0 auto;
-        padding: 32px 20px 60px;
-      }
+  <script>
+    const boostBtn = document.getElementById('boostBtn');
+    const log = document.getElementById('log');
+    const wakeStatus = document.getElementById('wake-status');
+    const networkStatus = document.getElementById('network-status');
+    let wakeLock = null;
 
-      .topbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 32px;
-        border: 1px solid var(--line);
-        background: rgba(10, 16, 28, 0.8);
-        border-radius: 18px;
-        padding: 18px 22px;
-        box-shadow: var(--shadow);
+    // 1. Check Network Connection
+    function updateNetwork() {
+      if (navigator.onLine) {
+        networkStatus.textContent = "STABLE";
+        networkStatus.style.color = "#ffffff";
+      } else {
+        networkStatus.textContent = "OFFLINE (Connection Dropped!)";
+        networkStatus.style.color = "#ff3333";
       }
+    }
+    window.addEventListener('online', updateNetwork);
+    window.addEventListener('offline', updateNetwork);
+    updateNetwork();
 
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-      }
-
-      .brand-mark {
-        width: 40px;
-        height: 40px;
-        display: grid;
-        place-items: center;
-        border-radius: 12px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-2));
-        color: #08111d;
-        font-weight: 800;
-        box-shadow: 0 10px 20px rgba(87, 208, 255, 0.35);
-      }
-
-      .brand-name {
-        font-size: 1.1rem;
-        letter-spacing: 0.12em;
-        font-weight: 700;
-      }
-
-      .nav {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-
-      .nav a {
-        color: var(--muted);
-        text-decoration: none;
-        font-size: 0.85rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-      }
-
-      .status-pill {
-        border: 1px solid rgba(115, 249, 169, 0.35);
-        background: rgba(115, 249, 169, 0.08);
-        color: var(--green);
-        border-radius: 999px;
-        padding: 8px 14px;
-        font-size: 0.75rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        white-space: nowrap;
-      }
-
-      .hero {
-        display: grid;
-        grid-template-columns: 1.5fr 1fr;
-        gap: 24px;
-        margin-bottom: 24px;
-      }
-
-      .panel {
-        background: linear-gradient(180deg, rgba(18, 29, 48, 0.9), rgba(8, 13, 22, 0.95));
-        border: 1px solid var(--line);
-        border-radius: 24px;
-        box-shadow: var(--shadow);
-      }
-
-      .hero-main {
-        padding: 28px;
-      }
-
-      .eyebrow {
-        color: var(--primary);
-        text-transform: uppercase;
-        letter-spacing: 0.18em;
-        font-size: 0.7rem;
-        font-weight: 700;
-      }
-
-      h1 {
-        margin: 14px 0 14px;
-        font-size: clamp(2.2rem, 4vw, 4rem);
-        line-height: 1.05;
-      }
-
-      .lead {
-        color: var(--muted);
-        font-size: 1.04rem;
-        max-width: 62ch;
-        margin-bottom: 22px;
-      }
-
-      .cta-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-
-      button, select {
-        font: inherit;
-      }
-
-      .btn {
-        border: none;
-        border-radius: 12px;
-        padding: 12px 18px;
-        background: linear-gradient(135deg, var(--primary), #61f3c8);
-        color: #05131d;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        box-shadow: 0 12px 28px rgba(87, 208, 255, 0.25);
-      }
-
-      .btn:hover {
-        transform: translateY(-1px);
-      }
-
-      .btn.secondary {
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--text);
-        border: 1px solid var(--line);
-        box-shadow: none;
-      }
-
-      .hero-side {
-        padding: 22px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .hero-side::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(160deg, rgba(87, 208, 255, 0.12), transparent 45%, rgba(140, 125, 255, 0.12));
-      }
-
-      .mini-graph {
-        position: relative;
-        height: 210px;
-        margin-top: 12px;
-        border-radius: 18px;
-        background: rgba(9, 14, 25, 0.7);
-        border: 1px solid var(--line);
-        overflow: hidden;
-      }
-
-      .mini-graph svg {
-        width: 100%;
-        height: 100%;
-        display: block;
-      }
-
-      .grid-stats {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(180px, 1fr));
-        gap: 18px;
-        margin-bottom: 24px;
-      }
-
-      .metric-card {
-        padding: 22px 18px;
-      }
-
-      .metric-label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--muted);
-        margin-bottom: 12px;
-      }
-
-      .metric-value {
-        display: flex;
-        align-items: baseline;
-        gap: 8px;
-      }
-
-      .metric-value strong {
-        font-size: clamp(1.8rem, 2vw, 2.3rem);
-        line-height: 1;
-      }
-
-      .metric-value span {
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-
-      .metric-row {
-        margin-top: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        color: var(--muted);
-        font-size: 0.8rem;
-      }
-
-      .meter {
-        width: 100%;
-        height: 8px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.06);
-        overflow: hidden;
-        margin-top: 10px;
-      }
-
-      .meter-fill {
-        height: 100%;
-        width: 50%;
-        border-radius: inherit;
-        background: linear-gradient(90deg, var(--primary), var(--green));
-      }
-
-      .content {
-        display: grid;
-        grid-template-columns: 1.4fr 0.9fr;
-        gap: 24px;
-      }
-
-      .panel-section {
-        padding: 24px;
-      }
-
-      .section-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 20px;
-      }
-
-      .section-head h2 {
-        font-size: 1.2rem;
-        margin: 0;
-      }
-
-      .tiny-tag {
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: rgba(87, 208, 255, 0.08);
-        border: 1px solid rgba(87, 208, 255, 0.25);
-        color: var(--primary);
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-      }
-
-      .network-card {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-      }
-
-      .network-box {
-        border-radius: 18px;
-        border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.02);
-        padding: 18px;
-      }
-
-      .network-box .label {
-        color: var(--muted);
-        font-size: 0.75rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-      }
-
-      .network-box .big {
-        display: block;
-        margin-top: 12px;
-        font-size: clamp(1.9rem, 2.3vw, 2.5rem);
-        font-weight: 800;
-      }
-
-      .network-box .min {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 18px;
-        color: var(--muted);
-        font-size: 0.78rem;
-      }
-
-      .data-table {
-        margin-top: 20px;
-        display: grid;
-        gap: 12px;
-      }
-
-      .data-row {
-        display: grid;
-        grid-template-columns: 150px 1fr 48px;
-        gap: 14px;
-        align-items: center;
-        font-size: 0.9rem;
-      }
-
-      .data-row .name {
-        color: var(--muted);
-      }
-
-      .bar {
-        height: 10px;
-        background: rgba(255, 255, 255, 0.06);
-        border-radius: 999px;
-        overflow: hidden;
-      }
-
-      .bar > span {
-        display: block;
-        height: 100%;
-        border-radius: inherit;
-        background: linear-gradient(90deg, var(--green), var(--primary));
-      }
-
-      .data-row .value {
-        font-weight: 700;
-        text-align: right;
-      }
-
-      .controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 22px;
-      }
-
-      .select-wrap {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 10px 12px;
-      }
-
-      select {
-        appearance: none;
-        background: transparent;
-        border: none;
-        color: var(--text);
-        padding-right: 24px;
-        font-weight: 600;
-        outline: none;
-      }
-
-      .signal-box {
-        padding: 18px;
-        border-radius: 18px;
-        border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.02);
-      }
-
-      .signal-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 18px;
-      }
-
-      .status-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: var(--green);
-        box-shadow: 0 0 18px rgba(115, 249, 169, 0.8);
-      }
-
-      .signal-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(110px, 1fr));
-        gap: 12px;
-      }
-
-      .signal-cell {
-        padding: 14px 12px;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--line);
-      }
-
-      .signal-cell .k {
-        color: var(--muted);
-        font-size: 0.7rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-      }
-
-      .signal-cell .v {
-        display: block;
-        margin-top: 10px;
-        font-size: 1.3rem;
-        font-weight: 800;
-      }
-
-      @media (max-width: 980px) {
-        .hero,
-        .content,
-        .grid-stats {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      @media (max-width: 620px) {
-        .topbar {
-          flex-direction: column;
-          align-items: flex-start;
+    boostBtn.addEventListener('click', async () => {
+      try {
+        // 2. Go Fullscreen
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
         }
 
-        .nav {
-          width: 100%;
-          justify-content: space-between;
+        // 3. Keep Screen Awake
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeStatus.textContent = "ACTIVE";
+          wakeStatus.style.color = "#ffffff";
         }
 
-        .network-card,
-        .signal-grid {
-          grid-template-columns: 1fr;
-        }
+        log.innerHTML = "Tactical Fullscreen ENGAGED.<br>Wake Lock ENGAGED.<br>Ready for Blood Strike.";
+        boostBtn.textContent = "System Active";
+        boostBtn.style.backgroundColor = "#ffffff";
+        boostBtn.style.color = "#000000";
+        boostBtn.style.boxShadow = "0 0 20px rgba(255, 255, 255, 0.6)";
+        
+      } catch (err) {
+        log.textContent = "Error: " + err.message;
       }
-    </style>
-  </head>
-  <body>
-    <div class="shell">
-      <header class="topbar">
-        <div class="brand">
-          <div class="brand-mark">L</div>
-          <div class="brand-name">LOADOUT HUB</div>
-        </div>
-
-        <nav class="nav" aria-label="Main navigation">
-          <a href="#">Dashboard</a>
-          <a href="#">Servers</a>
-          <a href="#">Performance</a>
-          <a href="#">Settings</a>
-        </nav>
-
-        <div class="status-pill">ONLINE • READY</div>
-      </header>
-
-      <section class="hero">
-        <div class="panel hero-main">
-          <div class="eyebrow">Gaming infrastructure</div>
-          <h1>Ping smarter. Play harder.</h1>
-          <p class="lead">
-            Monitor your network in real time, track frame performance, and keep your setup tuned for the best competitive edge before every match.
-          </p>
-
-          <div class="cta-row">
-            <button class="btn" id="pingBtn">Run ping test</button>
-            <button class="btn secondary" id="boostBtn">Optimize network</button>
-          </div>
-        </div>
-
-        <aside class="panel hero-side">
-          <div class="section-head">
-            <h2>Live match pulse</h2>
-            <div class="tiny-tag" id="regionLabel">NA East</div>
-          </div>
-
-          <div class="mini-graph">
-            <svg viewBox="0 0 420 210" preserveAspectRatio="none" aria-label="Latency chart">
-              <defs>
-                <linearGradient id="waveGradient" x1="0" x2="1">
-                  <stop offset="0%" stop-color="#57d0ff" stop-opacity="0.8" />
-                  <stop offset="100%" stop-color="#73f9a9" stop-opacity="0.9" />
-                </linearGradient>
-              </defs>
-              <g opacity="0.18" stroke="#8aa4d4" stroke-width="1">
-                <path d="M0 35 H420 M0 75 H420 M0 115 H420 M0 155 H420 M0 195 H420" />
-              </g>
-              <path
-                id="sparkLine"
-                d="M0 150 C40 150, 62 130, 100 98 S170 110, 200 90 S260 70, 320 100 S370 115, 420 78"
-                fill="none"
-                stroke="url(#waveGradient)"
-                stroke-width="4"
-                stroke-linecap="round"
-              />
-            </svg>
-          </div>
-        </aside>
-      </section>
-
-      <section class="grid-stats">
-        <article class="panel metric-card">
-          <div class="metric-label">Ping</div>
-          <div class="metric-value">
-            <strong id="pingValue">24</strong>
-            <span>ms</span>
-          </div>
-          <div class="meter"><div class="meter-fill" id="pingFill" style="width: 20%"></div></div>
-          <div class="metric-row"><span>Network health</span><span id="pingState">Excellent</span></div>
-        </article>
-
-        <article class="panel metric-card">
-          <div class="metric-label">FPS</div>
-          <div class="metric-value">
-            <strong id="fpsValue">144</strong>
-            <span>fps</span>
-          </div>
-          <div class="meter"><div class="meter-fill" id="fpsFill" style="width: 82%"></div></div>
-          <div class="metric-row"><span>Render quality</span><span id="fpsState">Smooth</span></div>
-        </article>
-
-        <article class="panel metric-card">
-          <div class="metric-label">Packet loss</div>
-          <div class="metric-value">
-            <strong id="lossValue">0.4</strong>
-            <span>%</span>
-          </div>
-          <div class="meter"><div class="meter-fill" id="lossFill" style="width: 12%"></div></div>
-          <div class="metric-row"><span>Stability</span><span id="lossState">Stable</span></div>
-        </article>
-
-        <article class="panel metric-card">
-          <div class="metric-label">Download</div>
-          <div class="metric-value">
-            <strong id="downloadValue">245</strong>
-            <span>Mbps</span>
-          </div>
-          <div class="meter"><div class="meter-fill" id="downloadFill" style="width: 66%"></div></div>
-          <div class="metric-row"><span>Internet</span><span id="downloadState">Fast</span></div>
-        </article>
-      </section>
-
-      <section class="content">
-        <div class="panel panel-section">
-          <div class="section-head">
-            <h2>Connection metrics</h2>
-            <div class="tiny-tag">Live</div>
-          </div>
-
-          <div class="network-card">
-            <div class="network-box">
-              <div class="label">Upload</div>
-              <span class="big" id="uploadValue">52</span>
-              <div class="min"><span>Mbps</span><span id="uploadState">Good</span></div>
-            </div>
-            <div class="network-box">
-              <div class="label">CPU load</div>
-              <span class="big" id="cpuValue">38</span>
-              <div class="min"><span>% used</span><span id="cpuState">Efficient</span></div>
-            </div>
-          </div>
-
-          <div class="data-table" aria-label="Performance table">
-            <div class="data-row">
-              <div class="name">Latency</div>
-              <div class="bar"><span id="latencyBar" style="width: 27%"></span></div>
-              <div class="value" id="latencyText">24ms</div>
-            </div>
-            <div class="data-row">
-              <div class="name">GPU</div>
-              <div class="bar"><span id="gpuBar" style="width: 68%"></span></div>
-              <div class="value" id="gpuText">68%</div>
-            </div>
-            <div class="data-row">
-              <div class="name">Voice chat</div>
-              <div class="bar"><span id="voiceBar" style="width: 90%"></span></div>
-              <div class="value" id="voiceText">HD</div>
-            </div>
-          </div>
-
-          <div class="controls">
-            <button class="btn" id="refreshBtn">Refresh status</button>
-            <div class="select-wrap">
-              <label for="regionSelect" style="color: var(--muted); font-size: 0.8rem;">Region</label>
-              <select id="regionSelect">
-                <option value="NA East">NA East</option>
-                <option value="Europe">Europe</option>
-                <option value="Asia">Asia</option>
-                <option value="South America">South America</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <aside class="panel panel-section">
-          <div class="section-head">
-            <h2>System health</h2>
-            <div class="tiny-tag">Optimal</div>
-          </div>
-
-          <div class="signal-box">
-            <div class="signal-header">
-              <strong>Match readiness</strong>
-              <span class="status-dot" aria-label="Ready"></span>
-            </div>
-
-            <div class="signal-grid">
-              <div class="signal-cell">
-                <div class="k">Ping</div>
-                <span class="v" id="signalPing">24ms</span>
-              </div>
-              <div class="signal-cell">
-                <div class="k">FPS</div>
-                <span class="v" id="signalFps">144</span>
-              </div>
-              <div class="signal-cell">
-                <div class="k">Loss</div>
-                <span class="v" id="signalLoss">0.4%</span>
-              </div>
-              <div class="signal-cell">
-                <div class="k">Status</div>
-                <span class="v" id="signalStatus">Stable</span>
-              </div>
-            </div>
-          </div>
-        </aside>
-      </section>
-    </div>
-
-    <script>
-      const appState = {
-        region: 'NA East',
-        ping: 24,
-        fps: 144,
-        packetLoss: 0.4,
-        download: 245,
-        upload: 52,
-        cpu: 38,
-        gpu: 68,
-        voice: 92,
-      };
-
-      const regionPingMap = {
-        'NA East': { min: 18, max: 34 },
-        Europe: { min: 22, max: 42 },
-        Asia: { min: 28, max: 56 },
-        'South America': { min: 35, max: 70 },
-      };
-
-      const pingValue = document.getElementById('pingValue');
-      const pingFill = document.getElementById('pingFill');
-      const pingState = document.getElementById('pingState');
-      const fpsValue = document.getElementById('fpsValue');
-      const fpsFill = document.getElementById('fpsFill');
-      const fpsState = document.getElementById('fpsState');
-      const lossValue = document.getElementById('lossValue');
-      const lossFill = document.getElementById('lossFill');
-      const lossState = document.getElementById('lossState');
-      const downloadValue = document.getElementById('downloadValue');
-      const downloadFill = document.getElementById('downloadFill');
-      const downloadState = document.getElementById('downloadState');
-      const uploadValue = document.getElementById('uploadValue');
-      const uploadState = document.getElementById('uploadState');
-      const cpuValue = document.getElementById('cpuValue');
-      const cpuState = document.getElementById('cpuState');
-      const latencyBar = document.getElementById('latencyBar');
-      const latencyText = document.getElementById('latencyText');
-      const gpuBar = document.getElementById('gpuBar');
-      const gpuText = document.getElementById('gpuText');
-      const voiceBar = document.getElementById('voiceBar');
-      const voiceText = document.getElementById('voiceText');
-      const regionLabel = document.getElementById('regionLabel');
-      const regionSelect = document.getElementById('regionSelect');
-      const signalPing = document.getElementById('signalPing');
-      const signalFps = document.getElementById('signalFps');
-      const signalLoss = document.getElementById('signalLoss');
-      const signalStatus = document.getElementById('signalStatus');
-      const sparkLine = document.getElementById('sparkLine');
-
-      function formatPingStatus(ping) {
-        if (ping <= 30) return { label: 'Excellent', width: 18 };
-        if (ping <= 60) return { label: 'Great', width: 34 };
-        if (ping <= 90) return { label: 'Good', width: 58 };
-        return { label: 'Fair', width: 80 };
-      }
-
-      function formatFpsStatus(fps) {
-        if (fps >= 144) return { label: 'Smooth', width: 86 };
-        if (fps >= 100) return { label: 'Stable', width: 74 };
-        if (fps >= 60) return { label: 'Playable', width: 58 };
-        return { label: 'Low', width: 38 };
-      }
-
-      function formatLossStatus(loss) {
-        if (loss <= 0.5) return { label: 'Stable', width: 10 };
-        if (loss <= 1.5) return { label: 'Light', width: 28 };
-        return { label: 'Risky', width: 55 };
-      }
-
-      function formatDownloadStatus(speed) {
-        if (speed >= 200) return { label: 'Fast', width: 72 };
-        if (speed >= 120) return { label: 'Good', width: 58 };
-        return { label: 'Okay', width: 42 };
-      }
-
-      function updateDashboard() {
-        const pingStatus = formatPingStatus(appState.ping);
-        const fpsStatus = formatFpsStatus(appState.fps);
-        const lossStatus = formatLossStatus(appState.packetLoss);
-        const downloadStatus = formatDownloadStatus(appState.download);
-
-        pingValue.textContent = appState.ping;
-        pingFill.style.width = `${pingStatus.width}%`;
-        pingState.textContent = pingStatus.label;
-
-        fpsValue.textContent = appState.fps;
-        fpsFill.style.width = `${fpsStatus.width}%`;
-        fpsState.textContent = fpsStatus.label;
-
-        lossValue.textContent = appState.packetLoss.toFixed(1);
-        lossFill.style.width = `${lossStatus.width}%`;
-        lossState.textContent = lossStatus.label;
-
-        downloadValue.textContent = appState.download;
-        downloadFill.style.width = `${downloadStatus.width}%`;
-        downloadState.textContent = downloadStatus.label;
-
-        uploadValue.textContent = appState.upload;
-        uploadState.textContent = appState.upload >= 40 ? 'Good' : 'Low';
-
-        cpuValue.textContent = appState.cpu;
-        cpuState.textContent = appState.cpu <= 55 ? 'Efficient' : 'Busy';
-
-        latencyBar.style.width = `${Math.min(100, (appState.ping / 120) * 100)}%`;
-        latencyText.textContent = `${appState.ping}ms`;
-
-        gpuBar.style.width = `${appState.gpu}%`;
-        gpuText.textContent = `${appState.gpu}%`;
-
-        voiceBar.style.width = `${appState.voice}%`;
-        voiceText.textContent = appState.voice >= 90 ? 'HD' : 'Normal';
-
-        regionLabel.textContent = appState.region;
-        signalPing.textContent = `${appState.ping}ms`;
-        signalFps.textContent = appState.fps;
-        signalLoss.textContent = `${appState.packetLoss.toFixed(1)}%`;
-        signalStatus.textContent = pingStatus.label;
-
-        const base = 150 - appState.ping * 0.7 + Math.random() * 20;
-        const graphPoints = [
-          'M0 ' + (base + 18),
-          'C40 ' + (base - 8) + ', 62 ' + (base - 18) + ', 100 ' + (base - 22),
-          'S170 ' + (base - 10) + ', 200 ' + (base - 18),
-          'S260 ' + (base - 35) + ', 320 ' + (base - 15),
-          'S370 ' + (base - 22) + ', 420 ' + (base - 36)
-        ].join(' ');
-        sparkLine.setAttribute('d', graphPoints);
-      }
-
-      function simulatePing() {
-        const regionRange = regionPingMap[appState.region];
-        appState.ping = Math.floor(Math.random() * (regionRange.max - regionRange.min + 1)) + regionRange.min;
-        appState.packetLoss = Number((Math.random() * 1.4).toFixed(1));
-        appState.download = Math.floor(Math.random() * 120) + 180;
-        appState.upload = Math.floor(Math.random() * 32) + 32;
-        appState.cpu = Math.floor(Math.random() * 30) + 24;
-        appState.gpu = Math.floor(Math.random() * 22) + 58;
-        appState.voice = Math.floor(Math.random() * 15) + 82;
-        appState.fps = Math.floor(Math.random() * 40) + 128;
-        updateDashboard();
-      }
-
-      document.getElementById('pingBtn').addEventListener('click', simulatePing);
-      document.getElementById('refreshBtn').addEventListener('click', simulatePing);
-
-      document.getElementById('boostBtn').addEventListener('click', () => {
-        appState.ping = Math.max(12, appState.ping - 8);
-        appState.packetLoss = Math.max(0.1, appState.packetLoss - 0.3);
-        appState.fps = Math.min(240, appState.fps + 10);
-        updateDashboard();
-      });
-
-      regionSelect.addEventListener('change', (event) => {
-        appState.region = event.target.value;
-        simulatePing();
-      });
-
-      updateDashboard();
-    </script>
-    <script>
-      // Register the Service Worker for PWA install
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-            .then(registration => {
-              console.log('Service Worker registered with scope:', registration.scope);
-            })
-            .catch(error => {
-              console.error('Service Worker registration failed:', error);
-            });
-        });
-      }
-    </script>
-  </body>
+    });
+  </script>
+</body>
 </html>
