@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loadout Hub - Stealth Mode</title>
+  <title>Loadout Hub - Universal Mode</title>
   <style>
     body {
-      background-color: #000000; /* Pure Black Background */
-      color: #ffffff; /* Crisp White Text */
+      background-color: #000000; 
+      color: #ffffff; 
       font-family: 'Courier New', Courier, monospace;
       display: flex;
       flex-direction: column;
@@ -17,20 +17,27 @@
       margin: 0;
       text-align: center;
     }
-    h1 { 
-      text-transform: uppercase; 
-      letter-spacing: 3px; 
-      color: #ffffff;
-    }
+    h1 { text-transform: uppercase; letter-spacing: 3px; }
     .status-box {
-      background-color: #0a0a0a; /* Almost black */
+      background-color: #0a0a0a; 
       padding: 20px;
       border-radius: 5px;
-      border: 1px solid #333333; /* Dark grey border */
+      border: 1px solid #333333; 
       margin: 20px 0;
       width: 80%;
       max-width: 400px;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    }
+    input[type="text"] {
+      background-color: #111;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 10px;
+      margin-bottom: 20px;
+      width: 80%;
+      max-width: 300px;
+      text-align: center;
+      font-family: 'Courier New', Courier, monospace;
+      text-transform: uppercase;
     }
     button {
       background-color: #000000;
@@ -39,50 +46,46 @@
       padding: 15px 30px;
       font-size: 18px;
       font-weight: bold;
-      border-radius: 3px;
       cursor: pointer;
       text-transform: uppercase;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-      transition: 0.2s ease-in-out;
+      transition: 0.2s;
     }
     button:active { 
       transform: scale(0.95); 
       background-color: #ffffff;
       color: #000000;
     }
-    #log { 
-      margin-top: 20px; 
-      color: #666666; 
-      font-size: 14px; 
-    }
+    #log { margin-top: 20px; color: #666666; font-size: 14px; }
   </style>
 </head>
 <body>
 
   <h1>Loadout Hub</h1>
   
+  <input type="text" id="gameInput" placeholder="Enter Game (e.g. Subway Surfers)">
+
   <div class="status-box">
     <h3>Network: <span id="network-status" style="color: #00ff00;">Checking...</span></h3>
     <p>Screen Lock: <span id="wake-status" style="color: #ff3333;">OFF</span></p>
   </div>
 
-  <button id="boostBtn">Activate Stealth Mode</button>
-  <div id="log">Awaiting deployment...</div>
+  <button id="boostBtn">Initialize Mode</button>
+  <div id="log">Awaiting target...</div>
 
   <script>
     const boostBtn = document.getElementById('boostBtn');
     const log = document.getElementById('log');
     const wakeStatus = document.getElementById('wake-status');
     const networkStatus = document.getElementById('network-status');
+    const gameInput = document.getElementById('gameInput');
     let wakeLock = null;
 
-    // 1. Check Network Connection
     function updateNetwork() {
       if (navigator.onLine) {
         networkStatus.textContent = "STABLE";
         networkStatus.style.color = "#ffffff";
       } else {
-        networkStatus.textContent = "OFFLINE (Connection Dropped!)";
+        networkStatus.textContent = "OFFLINE";
         networkStatus.style.color = "#ff3333";
       }
     }
@@ -91,24 +94,22 @@
     updateNetwork();
 
     boostBtn.addEventListener('click', async () => {
+      let targetGame = gameInput.value || "UNKNOWN TARGET";
+      
       try {
-        // 2. Go Fullscreen
         if (!document.fullscreenElement) {
           await document.documentElement.requestFullscreen();
         }
-
-        // 3. Keep Screen Awake
         if ('wakeLock' in navigator) {
           wakeLock = await navigator.wakeLock.request('screen');
           wakeStatus.textContent = "ACTIVE";
           wakeStatus.style.color = "#ffffff";
         }
 
-        log.innerHTML = "Tactical Fullscreen ENGAGED.<br>Wake Lock ENGAGED.<br>Ready for Blood Strike.";
+        log.innerHTML = `Target Locked: <b>${targetGame}</b>.<br>Wake Lock ENGAGED.<br>System Ready.`;
         boostBtn.textContent = "System Active";
         boostBtn.style.backgroundColor = "#ffffff";
         boostBtn.style.color = "#000000";
-        boostBtn.style.boxShadow = "0 0 20px rgba(255, 255, 255, 0.6)";
         
       } catch (err) {
         log.textContent = "Error: " + err.message;
