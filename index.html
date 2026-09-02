@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loadout Hub - Universal Mode</title>
+  
+  <!-- THE MAGIC LINE: This links your app to your manifest -->
+  <link rel="manifest" href="manifest.json">
+  
   <style>
     body {
       background-color: #000000; 
@@ -73,6 +77,11 @@
   <div id="log">Awaiting target...</div>
 
   <script>
+    // THE SECOND MAGIC LINE: This registers your Service Worker for offline/install support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error:', err));
+    }
+
     const boostBtn = document.getElementById('boostBtn');
     const log = document.getElementById('log');
     const wakeStatus = document.getElementById('wake-status');
